@@ -71,13 +71,14 @@ The parser will check for a default value if one isn't found in a given array st
 ---
   title: exceptionally important title!
   body: |
-	<for var="apps" refname="app">
-		<div class="box">
-		</div>
-	</for>
+    <for var="apps" refname="app"> 
+    <div class="box">
+    </div>
+    </for>
   
   defaults:
     - apps.purpose: Wasn't sure what to put here!
+    - apps.appname: wowie what
 
   apps:
     - appname: atomizer3000

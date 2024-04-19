@@ -67,9 +67,12 @@ func ContentReader(contentsPath string) ReaderContents {
 			slog.Debug("Got var: ", "key", key, "entry", entry)
 			valsMap[key] = entry.(string)
 
+		// We can't immediately check for the type of interface{}, so we can only check at this level for now
+		// We know that the only valid types of arrays are []string or []map[string]string, however
 		case []interface{}:
 			slog.Debug("Got array: ", "var", key)
 
+			// Manually do logic for defaults all at once, since it's simple enough
 			if key == "defaults" {
 				for index := range entryContent {
 					varContent := entryContent[index]
@@ -81,6 +84,7 @@ func ContentReader(contentsPath string) ReaderContents {
 				continue
 			}
 
+			// For each array found
 			for arrValIndex := range entryContent {
 				arrValContent := entryContent[arrValIndex]
 				switch arrValContent.(type) {
@@ -93,6 +97,7 @@ func ContentReader(contentsPath string) ReaderContents {
 
 					var structMap map[string]string = make(map[string]string)
 
+					// Read each key/value pair in the structure and append to the overall struct array
 					for k, v := range arrValContent.(map[string]interface{}) {
 						if !slices.Contains(structures[key], k) {
 							structures[key] = append(structures[key], k)

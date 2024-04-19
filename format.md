@@ -72,7 +72,7 @@ The parser will check for a default value if one isn't found in a given array st
   body: |
     <for var="apps" refname="app"> 
     <div class="box">
-	<p>Appname: ${app.appname}, Purpose: ${app.purpose}</p>
+    <p>Appname: ${app.appname}, Purpose: ${app.purpose}</p>
     </div>
     </for>
   

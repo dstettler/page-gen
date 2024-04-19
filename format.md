@@ -17,7 +17,6 @@ There are some default variables that page-gen keeps internally:
 in the contents file using the `title` key at the top level.
 - `PG_DATE_SAVED` - Will be automatically generated when page-gen is initially run.
 This cannot be overwritten.
-- `PG_CONTENT` - Specified in the contents file using the key: `body`.
 
 Additionally, top-level variables in the contents file can be referenced by appending
 `V_` to their name. For example, if one declares a variable `new_header_name` in their
@@ -40,7 +39,7 @@ types of attributes as in content body. Note that if an iterator `var` is not fo
 		<h1>${PG_TITLE}</h1>
 		<p id="date">${PG_DATE_SAVED}</p>
 		<p id="author">${V_author}</p>
-		${PG_CONTENT}
+		${V_body}
 		<for var="footeritems" refname="item">
 			<div class="footer-content"> </div>
 		</for>
@@ -73,6 +72,7 @@ The parser will check for a default value if one isn't found in a given array st
   body: |
     <for var="apps" refname="app"> 
     <div class="box">
+	<p>Appname: ${app.appname}, Purpose: ${app.purpose}</p>
     </div>
     </for>
   

@@ -10,7 +10,7 @@ When generating the page, each variable will be filled in using preset definitio
 from a separate `contents.yml` file.
 By default, page-gen will use the format of `[pagename]-contents.yml` relative to
 the given `--reldir` directory. If this cannot be found, 
-and an alternative is not specified by way of an argument, execution will be halted.
+and an alternative is not specified by way of a `--contentfile` argument, execution will be halted.
 
 There are some default variables that page-gen keeps internally:
 - `PG_TITLE` - Automatically generated based on the given title, but can also be overridden

@@ -6,14 +6,14 @@ import (
 	"os"
 	"strings"
 
-	pagegencore "pagegen/core"
+	pagegen "pagegen/core"
 
 	"github.com/alexflint/go-arg"
 )
 
 func main() {
 	cwd, err := os.Getwd()
-	pagegencore.CheckErr(err)
+	pagegen.CheckErr(err)
 
 	cwd = strings.ReplaceAll(cwd, "\\", "/")
 
@@ -57,15 +57,15 @@ func main() {
 
 	fmt.Println("Processing...")
 	slog.Info("Reading contents of ", "contentfile", args.Content_File)
-	contents := pagegencore.ContentReader(args.Content_File)
+	contents := pagegen.ContentReader(args.Content_File)
 	slog.Info("Done reading content!")
 
 	slog.Info("Parsing variables...")
-	contents = pagegencore.VariablesParser(contents)
+	contents = pagegen.VariablesParser(contents)
 	slog.Info("Done parsing variables!")
 
 	slog.Info("Parsing template...")
-	generatedPage := pagegencore.TemplateParser(contents, args.Template)
+	generatedPage := pagegen.TemplateParser(contents, args.Template)
 	slog.Info("Done parsing template!")
 	fmt.Println(generatedPage)
 

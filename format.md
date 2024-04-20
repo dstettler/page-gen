@@ -5,7 +5,10 @@ page-gen to generate output webpages.
 
 ## Templates
 
-Within a template file, variables are written using `${var}` syntax.
+Within a template file, variables are written using `{var}` syntax.
+Since we are using curly braces as an indicator of a variable, if you wish to use these characters
+in your HTML document, just use the HTML character code for the left curly brace `&#123;` and the scanner
+will not attempt to read the following characters as a variable name.
 When generating the page, each variable will be filled in using preset definitions
 from a separate `contents.yml` file.
 By default, page-gen will use the format of `[pagename]-contents.yml` relative to
@@ -36,10 +39,10 @@ types of attributes as in content body. Note that if an iterator `var` is not fo
 	</head>
 
 	<body>
-		<h1>${PG_TITLE}</h1>
-		<p id="date">${PG_DATE_SAVED}</p>
-		<p id="author">${V_author}</p>
-		${V_body}
+		<h1>{PG_TITLE}</h1>
+		<p id="date">{PG_DATE_SAVED}</p>
+		<p id="author">{V_author}</p>
+		{V_body}
 		<for var="footeritems" refname="item">
 			<div class="footer-content"> </div>
 		</for>
@@ -72,7 +75,7 @@ The parser will check for a default value if one isn't found in a given array st
   body: |
     <for var="apps" refname="app"> 
     <div class="box">
-    <p>Appname: ${app.appname}, Purpose: ${app.purpose}</p>
+    <p>Appname: {app.appname}, Purpose: {app.purpose}</p>
     </div>
     </for>
   

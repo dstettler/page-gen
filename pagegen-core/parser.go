@@ -137,11 +137,15 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 	return HTMLTag{}, false
 }
 
-func VariablesParser(contents ReaderContents) ReaderContents {
-
-	return contents
+// Will returned parsed value
+func ParseValContent(valKey string, contents *ReaderContents) string {
+	return ""
 }
 
-func TemplateParser(contents ReaderContents, templatePath string) string {
+func VariablesParser(contents *ReaderContents) {
+
+}
+
+func TemplateParser(contents *ReaderContents, templatePath string) string {
 	return ""
 }

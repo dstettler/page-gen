@@ -61,11 +61,11 @@ func main() {
 	slog.Info("Done reading content!")
 
 	slog.Info("Parsing variables...")
-	contents = pagegen.VariablesParser(contents)
+	pagegen.VariablesParser(&contents)
 	slog.Info("Done parsing variables!")
 
 	slog.Info("Parsing template...")
-	generatedPage := pagegen.TemplateParser(contents, args.Template)
+	generatedPage := pagegen.TemplateParser(&contents, args.Template)
 	slog.Info("Done parsing template!")
 	fmt.Println(generatedPage)
 

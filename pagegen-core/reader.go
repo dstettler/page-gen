@@ -9,14 +9,14 @@ import (
 )
 
 type ReaderContents struct {
-	DirectVals      map[string]string
-	SimpleArrays    map[string][]string
-	StructureArrays map[string][]map[string]string
+	DirectVals      map[string]interface{}
+	SimpleArrays    map[string][]interface{}
+	StructureArrays map[string][]map[string]interface{}
 }
 
 // Uses the contents of `structure` to fill missing fields in the structure arrays read from the contents file
 // This will panic if a default value is not found for a field that is missing
-func FillDefaults(vals map[string][]map[string]string, defaults map[string]string, structure map[string][]string) map[string][]map[string]string {
+func FillDefaults(vals map[string][]map[string]interface{}, defaults map[string]interface{}, structure map[string][]string) map[string][]map[string]interface{} {
 	// For each structure in the contents
 	for arrayVarname, arrayTopLevelVal := range vals {
 		refArray := structure[arrayVarname]
@@ -55,10 +55,10 @@ func ContentReader(contentsPath string) ReaderContents {
 	CheckErr(err)
 
 	var structures map[string][]string = make(map[string][]string)
-	var valsMap map[string]string = make(map[string]string)
-	var arrsMap map[string][]string = make(map[string][]string)
-	var arrStructsMap map[string]([]map[string]string) = make(map[string][]map[string]string)
-	var defaults map[string]string = make(map[string]string)
+	var valsMap map[string]interface{} = make(map[string]interface{})
+	var arrsMap map[string][]interface{} = make(map[string][]interface{})
+	var arrStructsMap map[string]([]map[string]interface{}) = make(map[string][]map[string]interface{})
+	var defaults map[string]interface{} = make(map[string]interface{})
 
 	// Build the contents of valsMap and structures for each array/array structure and value encountered
 	for key, entry := range out {
@@ -66,6 +66,12 @@ func ContentReader(contentsPath string) ReaderContents {
 		case string:
 			slog.Debug("Got var: ", "key", key, "entry", entry)
 			valsMap[key] = entry.(string)
+		case int:
+			slog.Debug("Got var: ", "key", key, "entry", entry)
+			valsMap[key] = entry.(int)
+		case float64:
+			slog.Debug("Got var: ", "key", key, "entry", entry)
+			valsMap[key] = entry.(float64)
 
 		// We can't immediately check for the type of interface{}, so we can only check at this level for now
 		// We know that the only valid types of arrays are []string or []map[string]string, however
@@ -77,7 +83,15 @@ func ContentReader(contentsPath string) ReaderContents {
 				for index := range entryContent {
 					varContent := entryContent[index]
 					for k, v := range varContent.(map[string]interface{}) {
-						defaults[k] = v.(string)
+						switch v.(type) {
+						case string:
+							defaults[k] = v.(string)
+						case int:
+							defaults[k] = v.(int)
+						case float64:
+							defaults[k] = v.(float64)
+						}
+
 					}
 				}
 
@@ -91,11 +105,15 @@ func ContentReader(contentsPath string) ReaderContents {
 				case string:
 					slog.Debug("Item ", "index", arrValIndex, "content", arrValContent)
 					arrsMap[key] = append(arrsMap[key], arrValContent.(string))
+				case int:
+					arrsMap[key] = append(arrsMap[key], arrValContent.(int))
+				case float64:
+					arrsMap[key] = append(arrsMap[key], arrValContent.(float64))
 
 				case map[string]interface{}:
 					slog.Debug("Got structured arr: ", "index", arrValIndex)
 
-					var structMap map[string]string = make(map[string]string)
+					var structMap map[string]interface{} = make(map[string]interface{})
 
 					// Read each key/value pair in the structure and append to the overall struct array
 					for k, v := range arrValContent.(map[string]interface{}) {
@@ -107,6 +125,10 @@ func ContentReader(contentsPath string) ReaderContents {
 						switch v.(type) {
 						case string:
 							structMap[k] = v.(string)
+						case int:
+							structMap[k] = v.(int)
+						case float64:
+							structMap[k] = v.(float64)
 						default:
 							errorString := "Invalid value for key [" + k + "] in index [" + strconv.Itoa(arrValIndex) + "] of struct array [" + key + "]"
 							panic(errorString)

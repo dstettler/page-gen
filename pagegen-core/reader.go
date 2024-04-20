@@ -1,4 +1,4 @@
-package main
+package pagegencore
 
 import (
 	"log/slog"

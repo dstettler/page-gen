@@ -93,3 +93,31 @@ func TestGetHTMLTagFromStringIfFloat(t *testing.T) {
 		t.Fatalf(`Tags unequal!`)
 	}
 }
+
+func TestGetHTMLTagFromStringEnd(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	var tag HTMLTag
+	tag.TagName = "if"
+
+	var items map[string]interface{} = make(map[string]interface{})
+
+	tag.TagItems = items
+
+	tag.StartPos = 3
+
+	tag.TagType = htmlTagTypeCloseTag
+
+	testStr := "\n  </if>  "
+	tag.EndPos = len(testStr) - 3
+
+	genTag, found := GetHTMLTagFromString(testStr)
+	if !found {
+		t.Fatalf(`GetHTMLTagFromString returned not found!`)
+	}
+	if !cmp.Equal(tag, genTag) {
+		t.Log("Given:", tag, "\n")
+		t.Log("Generated:", genTag, "\n")
+		t.Fatalf(`Tags unequal!`)
+	}
+}

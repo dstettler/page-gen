@@ -6,9 +6,17 @@ import (
 	"unicode"
 )
 
+type HTMLTagType int
+
+const (
+	htmlTagTypeOpenTag  HTMLTagType = 0
+	htmlTagTypeCloseTag HTMLTagType = 1
+)
+
 type HTMLTag struct {
 	TagName          string
 	TagItems         map[string]interface{}
+	TagType          HTMLTagType
 	StartPos, EndPos int
 }
 
@@ -28,6 +36,7 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 	var name string
 	var items map[string]interface{} = make(map[string]interface{})
 	var currentItemName string
+	isEndTag := false
 	startPos := -1
 
 	readingState := htmlReaderStatePreReading
@@ -43,6 +52,7 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 				tag.StartPos = startPos
 				tag.EndPos = strIndex
 				tag.TagItems = items
+				tag.TagType = htmlTagTypeOpenTag
 				return tag, true
 			}
 
@@ -54,6 +64,14 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 			startPos = -1
 
 			continue
+		} else if currentChar == '>' && readingState == htmlReaderStateReadingTagName && isEndTag {
+			var tag HTMLTag
+			tag.TagName = buffer.String()
+			tag.StartPos = startPos
+			tag.EndPos = strIndex
+			tag.TagItems = items
+			tag.TagType = htmlTagTypeCloseTag
+			return tag, true
 		}
 
 		if readingState == htmlReaderStateSpace && !unicode.IsSpace(rune(currentChar)) && currentChar != '=' {
@@ -76,6 +94,8 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 				previousState = readingState
 				readingState = htmlReaderStateSpace
 				buffer.Reset()
+			} else if currentChar == '/' {
+				isEndTag = true
 			} else {
 				buffer.WriteByte(currentChar)
 			}

@@ -1,0 +1,29 @@
+---
+  title: exceptionally important title!
+  body: |
+    <for var="apps" refname="app"> 
+    <div class="box">
+    <p>Appname: ${app.appname}, Purpose: ${app.purpose}</p>
+    </div>
+    </for>
+  
+  defaults:
+    - apps.purpose: Wasn't sure what to put here!
+    - apps.appname: wowie what
+
+  apps:
+    - appname: atomizer3000
+      purpose: Destroy the world!
+
+    - appname: foobar2000
+      purpose: Groovin
+
+    - appname: app-inator1000
+      purpose: Pad my github stats
+
+    # Purpose will be the default value!
+    - appname: out-of-ideas-0000
+
+  footeritems: [nothing of note number 1, nothing of note number 2]
+
+  author: Me!

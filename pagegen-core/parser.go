@@ -1,6 +1,7 @@
 package pagegencore
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -29,6 +30,40 @@ const (
 	htmlReaderStateReadingTagItemName    HTMLReaderState = 2
 	htmlReaderStateReadingTagItemContent HTMLReaderState = 3
 )
+
+type VariableType int
+
+const (
+	variableTypeDirectVal
+	variableTypeArrayIndex
+	variableTypeStructArrayVal
+)
+
+type Replacements struct {
+	ReplacementStart, ReplacementEnd int
+	ReplacedContent                  string
+}
+
+type Refname struct {
+	RefString string
+	RefParent HTMLTag
+}
+
+func GetRefnamesStringArray(refnames []Refname) []string {
+	var arr []string = make([]string, 0)
+	for i := range refnames {
+		str := refnames[i].RefString
+		arr = append(arr, str)
+	}
+
+	return arr
+}
+
+func IsTagnameCustomTag(tag string) bool {
+	return (tag == "if-exists" ||
+		tag == "if" ||
+		tag == "for")
+}
 
 // Returns HTMLTag and true if tag found, or an empty HTMLTag and false otherwise
 func GetHTMLTagFromString(content string) (HTMLTag, bool) {
@@ -137,9 +172,107 @@ func GetHTMLTagFromString(content string) (HTMLTag, bool) {
 	return HTMLTag{}, false
 }
 
+// Returns string, int, or float64
+func RecursiveParseVar(interiorStr string, contents *ReaderContents, refnames []Refname) interface{} {
+	for i := range refnames {
+		if (interiorStr)
+	}
+}
+
+// Returns end tag corresponding to topTag, and a string of the contents
+func RecursiveParseTag(interiorStr string, contents *ReaderContents, topTag HTMLTag, refnames []Refname) (HTMLTag, string) {
+	var buffer strings.Builder
+
+	readingVariableName := false
+	var varnameBuffer strings.Builder
+	varnameStart := 0
+
+	var replacements []Replacements
+
+	for charIndex := range interiorStr {
+		currentChar := interiorStr[charIndex]
+
+		if currentChar == '<' {
+			tag, found := GetHTMLTagFromString(interiorStr[charIndex:])
+			if found && IsTagnameCustomTag(tag.TagName) {
+				if tag.TagName == topTag.TagName && tag.TagType == htmlTagTypeCloseTag {
+					return tag, buffer.String()
+				} else if tag.TagType == htmlTagTypeOpenTag {
+					if refname, err := tag.TagItems["refname"]; !err {
+						if slices.Contains(GetRefnamesStringArray(refnames), refname.(string)) {
+							panicStr := "Refname: " + refname.(string) + " already used!"
+							panic(panicStr)
+						}
+
+						var newRef Refname
+						newRef.RefString = refname.(string)
+						newRef.RefParent = tag
+
+						refnames = append(refnames, newRef)
+					}
+
+					RecursiveParseTag(interiorStr[tag.EndPos:], contents, tag, refnames)
+				}
+			}
+		} else if currentChar == '{' {
+			readingVariableName = true
+			varnameStart = charIndex
+		} else if currentChar == '}' {
+			if strings.Contains(varnameBuffer.String(), ".") {
+				strSlices := strings.Split(varnameBuffer.String(), ".")
+
+				if len(strSlices) != 2 {
+					panic("Variable must have only one string on either side of the '.'")
+				}
+
+				ident := strSlices[0]
+				var replacement Replacements
+
+				if content, err := contents.DirectVals[ident]; !err {
+					switch content.(type) {
+					case string:
+						replacement.ReplacedContent = RecursiveParseVar(content.(string), contents, refnames)
+					}
+				}
+
+				replacement.ReplacementEnd = charIndex
+				replacement.ReplacementStart = varnameStart
+
+				replacements = append(replacements, replacement)
+			}
+
+		}
+	}
+}
+
+func RecursiveParseString(valStr string, contents *ReaderContents) string {
+	var currentTag HTMLTag
+
+	for charIndex := range valStr {
+		currentChar := valStr[charIndex]
+
+		if currentChar == '<' {
+			tag, found := GetHTMLTagFromString(valStr[charIndex:])
+			if found && IsTagnameCustomTag(tag.TagName) {
+				// Skip tag content since we'll have already scanned these chars anyways
+				charIndex = tag.EndPos
+				currentTag = tag
+			}
+		}
+	}
+}
+
 // Will returned parsed value
-func ParseValContent(valKey string, contents *ReaderContents) string {
-	return ""
+func ParseValContent(valKey string, contents *ReaderContents) interface{} {
+	val := contents.DirectVals[valKey]
+	switch val.(type) {
+	// No need to recursive scan/parse contents if the val isn't a string :)
+	case int:
+	case float64:
+		return val
+	case string:
+		return RecursiveParseString(val.(string), contents)
+	}
 }
 
 func VariablesParser(contents *ReaderContents) {
